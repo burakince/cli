@@ -223,20 +223,22 @@ I find problematic.</p>
 do test-driven development, which nurishes my doubt in the quality of the software.</p>
 <a class="header" href="print.html#via-homebrew-osx-and-linux" id="via-homebrew-osx-and-linux"><h3>Via HomeBrew (OSX and Linux)</h3></a>
 <p>This is by far the easiest way to get the binary. Just execute the following code:</p>
-<pre><code class="language-bash">brew tap byron/share-secrets-safely
+<pre><code class="language-bash">brew tap share-secrets-safely/cli
 brew install sheesy
 </code></pre>
 <p>This will install <code>gpg</code> as well, which is required for the <a href="vault/about.html"><code>sheesy vault</code></a> to work.</p>
-<a class="header" href="print.html#via-a-hrefhttpsgithubcombyronshare-secrets-safelyreleasesreleasesa" id="via-a-hrefhttpsgithubcombyronshare-secrets-safelyreleasesreleasesa"><h3>Via <a href="https://github.com/Byron/share-secrets-safely/releases">Releases</a></h3></a>
+<a class="header" href="print.html#via-a-hrefhttpsgithubcomshare-secrets-safelyclireleasesreleasesa" id="via-a-hrefhttpsgithubcomshare-secrets-safelyclireleasesreleasesa"><h3>Via <a href="https://github.com/share-secrets-safely/cli/releases">Releases</a></h3></a>
 <p>Please note that in order to use <code>sy</code>, you will need a working <a href="https://www.gnupg.org/download/index.html#binary">installation of <code>gpg</code></a>.</p>
-<p>Navigate to the <a href="https://github.com/Byron/share-secrets-safely/releases">releases page</a> and download a release binary suitable
+<p>Navigate to the <a href="https://github.com/share-secrets-safely/cli/releases">releases page</a> and download a release binary suitable
 for your system. A full example <em>for linux</em> looks like this:</p>
-<pre><code class="language-bash use=sandboxed exec">curl --fail -Lso sy.tar.gz https://github.com/Byron/share-secrets-safely/releases/download/3.2.0/sy-cli-Linux-x86_64.tar.gz
-tar xzf sy.tar.gz
+<pre><code class="language-bash use=sandboxed exec">curl --fail -Lso sy.tar.gz https://github.com/share-secrets-safely/cli/releases/download/4.0.0/sy-cli-Linux-x86_64.tar.gz
+curl --fail -Lso sy.tar.gz.gpg https://github.com/share-secrets-safely/cli/releases/download/4.0.0/sy-cli-Linux-x86_64.tar.gz.gpg
 # verify 'sy' was built by one of the maintainers
-gpg --import &lt;(curl -s https://raw.githubusercontent.com/Byron/share-secrets-safely/master/signing-keys.asc) 2&gt;/dev/null
+gpg --import &lt;(curl -s https://raw.githubusercontent.com/share-secrets-safely/cli/master/signing-keys.asc) 2&gt;/dev/null
 gpg --sign-key --yes --batch 296B26A2B943AFFA &amp;&gt;/dev/null
-gpg --verify ./sy.gpg sy
+gpg --verify ./sy.tar.gz.gpg sy.tar.gz
+# now that we know it's the real thing, let's use it.
+tar xzf sy.tar.gz
 # This will print out that the file was created by one of the maintainers. If you chose to
 # trust the respective key after verifying it belongs to the maintainers, gpg will tell you
 # it is verified.
@@ -244,7 +246,7 @@ gpg --verify ./sy.gpg sy
 # Finally put the executable into your PATH
 mv ./sy /usr/local/bin
 </code></pre>
-<pre><code class="language-output">gpg: Signature made Sun Mar 18 20:45:53 2018 UTC
+<pre><code class="language-output">gpg: Signature made Sat Apr  7 18:54:42 2018 UTC
 gpg:                using RSA key C3BC52BD76E2C23BAC6EC06A665F99FA9D99966C
 gpg: checking the trustdb
 gpg: marginals needed: 3  completes needed: 1  trust model: pgp
@@ -259,7 +261,7 @@ Primary key fingerprint: 2CF6 E0B5 1AAF 73F0 9B1C  2117 4D1D A68C 8871 0E60
 <p>Now the <code>sy</code> executable is available in your <code>PATH</code>.</p>
 <pre><code class="language-bash exec">sy --help
 </code></pre>
-<pre><code class="language-output">sy 3.2.0
+<pre><code class="language-output">sy 4.0.0
 
 Sebastian Thiel &lt;byronimo@gmail.com&gt;
 The 'share-secrets-safely' CLI to interact with GPG/pass-like vaults.
@@ -276,14 +278,17 @@ SUBCOMMANDS:
     substitute     Substitutes templates using structured data. The idea is to build a tree of data that is used to
                    substitute in various templates, using multiple inputs and outputs.That way, secrets (like
                    credentials) can be extracted from the vault just once and used wherever needed without them
-                   touching disk.Handlebars is used as templating engine, and it's possible to refer to and inherit
-                   from other templates by their file-stem.
+                   touching disk.Liquid is used as template engine, and it's possible to refer to and inherit from
+                   other templates by their file-stem. Read more on their website at
+                   https://shopify.github.io/liquid .
     process        Merge JSON or YAML files from standard input from specified files. Multi-document YAML files are
                    supported. Merging a single file is explicitly valid and can be used to check for syntax errors.
+    extract        Extract scalar or complex values from any JSON or YAML file. Multi-document YAML files are
+                   supported.
     completions    generate completions for supported shell
     help           Prints this message or the help of the given subcommand(s)
 
-Read more on https://byron.github.io/share-secrets-safely
+Read more on https://share-secrets-safely.github.io/cli
 </code></pre>
 <a class="header" href="print.html#via-a-hrefhttprustuprscargoa" id="via-a-hrefhttprustuprscargoa"><h3>Via <a href="http://rustup.rs">Cargo</a></h3></a>
 <p>If you already have <code>cargo</code> available, installation is as easy as the following:</p>
@@ -291,8 +296,8 @@ Read more on https://byron.github.io/share-secrets-safely
 </code></pre>
 <p>This installation should be preferred as it makes updating the binary much easier.
 If you don't have <code>cargo</code> yet, you can install it via <a href="http://rustup.rs">instructions on rustup.rs</a>.</p>
-<p>Please note that for building on OSX, you are required to locally install <a href="https://github.com/Byron/share-secrets-safely/blob/ffafeacb744bdbe7af5a6317ecb65ee9aae13311/.travis.yml#L30">certain dependencies</a>,
-which is also the case on <a href="https://github.com/Byron/share-secrets-safely/blob/ffafeacb744bdbe7af5a6317ecb65ee9aae13311/.travis.yml#L22">linux systems</a>.</p>
+<p>Please note that for building on OSX, you are required to locally install <a href="https://github.com/share-secrets-safely/cli/blob/ffafeacb744bdbe7af5a6317ecb65ee9aae13311/.travis.yml#L30">certain dependencies</a>,
+which is also the case on <a href="https://github.com/share-secrets-safely/cli/blob/ffafeacb744bdbe7af5a6317ecb65ee9aae13311/.travis.yml#L22">linux systems</a>.</p>
 <p>The <code>vault</code> sub-command is quite a complex one as it implements all interactions with <strong>vaults</strong>.
 A <strong>vault</strong> contains shared secrets, and is compatible to the <a href="http://passwordstore.org/">unix password manager</a>.</p>
 <p>It provides subcommands for dealing with two kinds of items</p>
@@ -859,8 +864,8 @@ merge \
 <pre><code class="language-output">sy-substitute 
 Substitutes templates using structured data. The idea is to build a tree of data that is used to substitute in various
 templates, using multiple inputs and outputs.That way, secrets (like credentials) can be extracted from the vault just
-once and used wherever needed without them touching disk.Handlebars is used as templating engine, and it's possible to
-refer to and inherit from other templates by their file-stem.
+once and used wherever needed without them touching disk.Liquid is used as template engine, and it's possible to refer
+to and inherit from other templates by their file-stem. Read more on their website at https://shopify.github.io/liquid .
 
 USAGE:
     sy substitute [FLAGS] [OPTIONS] [--] [template-spec]...
@@ -877,6 +882,12 @@ OPTIONS:
     -d, --data &lt;data&gt;
             Structured data in YAML or JSON format to use when instantiating/substituting the template. If set,
             everything from standard input is interpreted as template.
+    -e, --engine &lt;name&gt;
+            The choice of engine used for the substitution. Valid values are 'handlebars' and 'liquid'. 'liquid', the
+            default, is coming with batteries included and very good at handling
+                                   one template at a time.
+                                   'handlebars' supports referencing other templates using partials, which is useful for
+            sharing of common functionality. [default: liquid]  [possible values: handlebars, liquid]
         --replace &lt;find-this:replace-with-that&gt;...
             A simple find &amp; replace for values for the string data to be placed into the template. The word to find is
             the first specified argument, the second one is the word to replace it with, e.g. -r=foo:bar.
@@ -894,6 +905,37 @@ ARGS:
             &lt;dst&gt; is unspecified, the substituted template will be output to stdout, e.g 'input.hbs:' or 'input.hbs'.
             Multiple templates are separated by the '--separator' accordingly. This is particularly useful for YAML
             files,where the separator should be `$'---\n'`
+</code></pre>
+<a class="header" href="print.html#meet-the-engines" id="meet-the-engines"><h3>Meet the engines</h3></a>
+<p>The substitution can be performed by various engines, each with their distinct advantages and disadvantages.</p>
+<p>This section sums up their highlights.</p>
+<a class="header" href="print.html#liquid-default" id="liquid-default"><h4>Liquid (default)</h4></a>
+<p>The <a href="http://shopify.github.io/liquid/"><code>Liquid</code> template engine</a> was originally created for web-shops and is both easy to use as well as fully-featured.</p>
+<p>It’s main benefit is its various filters, which can be used to put something into uppercase (<code>{{ “something” | uppercase }}</code>), or to encode text into base64 (<code>{{ “text” | base64 }}</code>).</p>
+<p>There are a few filters which have been added for convenience:</p>
+<ul>
+<li><strong>base64</strong>
+<ul>
+<li>Converts anything into its base64 representation.</li>
+<li>No arguments are supported.</li>
+</ul>
+</li>
+</ul>
+<a class="header" href="print.html#handlebars" id="handlebars"><h4>Handlebars</h4></a>
+<p>The first optional template engine is <a href="http://handlebarsjs.com"><code>handlebars</code></a>. Compared to <code>Liquid</code>, it’s rather bare-bone and does not support any filters. The filtering syntax also makes chained filters more cumbersome.</p>
+<p>However, it allows you to use <em>partials</em>, which are good to model something like multiple sites, which share a header and a footer. The shared portions are filled with data that contextually originates in the page that uses them.</p>
+<p>For example, in an invocation like this you can declare headers and footers without rendering them, and then output multiple pages that use it.</p>
+<pre><code class="language-bash ">sy substitute -d ./data.json ./header.tpl:/dev/null ./footer.tpl:/dev/null page-1.tpl:page1.html page-2.tpl:page2.html
+</code></pre>
+<p><strong>TODO</strong> actual executable example showing the partial, and to documentation</p>
+<p>The perceived disadvantage of having close to zero available filters would have to be compensated using a processing program which takes the data, and adds all the variations that you would need in your templates:</p>
+<pre><code class="language-bash">data-processor &lt; data.json | sy substitute template.tpl
+</code></pre>
+<a class="header" href="print.html#how-to-use-multi-file-data-in-your-templates" id="how-to-use-multi-file-data-in-your-templates"><h3>How to use multi-file data in your templates</h3></a>
+<p>You have probably seen this coming from a mile away, but this is a great opportunity for a shameless plug to advertise <code>sy merge</code>.</p>
+<p><code>sy merge</code> allows to merge multiple files together to become one, and even some additional processing to it.
+That way you can use the combined data as model during template substitution.</p>
+<pre><code class="language-bash">sy merge ./etc/ext/team.yml ./etc/project.yml —at=environment -e | sy substitute template.tpl
 </code></pre>
 <a class="header" href="print.html#tips-and-tricks-wip" id="tips-and-tricks-wip"><h3>Tips and Tricks (WIP)</h3></a>
 <ul>
@@ -944,8 +986,7 @@ ARGS:
 <pre><code class="language-bash use=sy-in-path exec">sy extract --help
 </code></pre>
 <pre><code class="language-output">sy-extract 
-Extract scalar or complex values from any JSON or YAML file.
-             Multi-document YAML files are supported.
+Extract scalar or complex values from any JSON or YAML file. Multi-document YAML files are supported.
 
 USAGE:
     sy extract [OPTIONS] &lt;pointer&gt;...

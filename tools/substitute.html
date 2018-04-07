@@ -125,8 +125,8 @@
 <pre><code class="language-output">sy-substitute 
 Substitutes templates using structured data. The idea is to build a tree of data that is used to substitute in various
 templates, using multiple inputs and outputs.That way, secrets (like credentials) can be extracted from the vault just
-once and used wherever needed without them touching disk.Handlebars is used as templating engine, and it's possible to
-refer to and inherit from other templates by their file-stem.
+once and used wherever needed without them touching disk.Liquid is used as template engine, and it's possible to refer
+to and inherit from other templates by their file-stem. Read more on their website at https://shopify.github.io/liquid .
 
 USAGE:
     sy substitute [FLAGS] [OPTIONS] [--] [template-spec]...
@@ -143,6 +143,12 @@ OPTIONS:
     -d, --data &lt;data&gt;
             Structured data in YAML or JSON format to use when instantiating/substituting the template. If set,
             everything from standard input is interpreted as template.
+    -e, --engine &lt;name&gt;
+            The choice of engine used for the substitution. Valid values are 'handlebars' and 'liquid'. 'liquid', the
+            default, is coming with batteries included and very good at handling
+                                   one template at a time.
+                                   'handlebars' supports referencing other templates using partials, which is useful for
+            sharing of common functionality. [default: liquid]  [possible values: handlebars, liquid]
         --replace &lt;find-this:replace-with-that&gt;...
             A simple find &amp; replace for values for the string data to be placed into the template. The word to find is
             the first specified argument, the second one is the word to replace it with, e.g. -r=foo:bar.
@@ -160,6 +166,37 @@ ARGS:
             &lt;dst&gt; is unspecified, the substituted template will be output to stdout, e.g 'input.hbs:' or 'input.hbs'.
             Multiple templates are separated by the '--separator' accordingly. This is particularly useful for YAML
             files,where the separator should be `$'---\n'`
+</code></pre>
+<a class="header" href="tools/substitute.html#meet-the-engines" id="meet-the-engines"><h3>Meet the engines</h3></a>
+<p>The substitution can be performed by various engines, each with their distinct advantages and disadvantages.</p>
+<p>This section sums up their highlights.</p>
+<a class="header" href="tools/substitute.html#liquid-default" id="liquid-default"><h4>Liquid (default)</h4></a>
+<p>The <a href="http://shopify.github.io/liquid/"><code>Liquid</code> template engine</a> was originally created for web-shops and is both easy to use as well as fully-featured.</p>
+<p>It’s main benefit is its various filters, which can be used to put something into uppercase (<code>{{ “something” | uppercase }}</code>), or to encode text into base64 (<code>{{ “text” | base64 }}</code>).</p>
+<p>There are a few filters which have been added for convenience:</p>
+<ul>
+<li><strong>base64</strong>
+<ul>
+<li>Converts anything into its base64 representation.</li>
+<li>No arguments are supported.</li>
+</ul>
+</li>
+</ul>
+<a class="header" href="tools/substitute.html#handlebars" id="handlebars"><h4>Handlebars</h4></a>
+<p>The first optional template engine is <a href="http://handlebarsjs.com"><code>handlebars</code></a>. Compared to <code>Liquid</code>, it’s rather bare-bone and does not support any filters. The filtering syntax also makes chained filters more cumbersome.</p>
+<p>However, it allows you to use <em>partials</em>, which are good to model something like multiple sites, which share a header and a footer. The shared portions are filled with data that contextually originates in the page that uses them.</p>
+<p>For example, in an invocation like this you can declare headers and footers without rendering them, and then output multiple pages that use it.</p>
+<pre><code class="language-bash ">sy substitute -d ./data.json ./header.tpl:/dev/null ./footer.tpl:/dev/null page-1.tpl:page1.html page-2.tpl:page2.html
+</code></pre>
+<p><strong>TODO</strong> actual executable example showing the partial, and to documentation</p>
+<p>The perceived disadvantage of having close to zero available filters would have to be compensated using a processing program which takes the data, and adds all the variations that you would need in your templates:</p>
+<pre><code class="language-bash">data-processor &lt; data.json | sy substitute template.tpl
+</code></pre>
+<a class="header" href="tools/substitute.html#how-to-use-multi-file-data-in-your-templates" id="how-to-use-multi-file-data-in-your-templates"><h3>How to use multi-file data in your templates</h3></a>
+<p>You have probably seen this coming from a mile away, but this is a great opportunity for a shameless plug to advertise <code>sy merge</code>.</p>
+<p><code>sy merge</code> allows to merge multiple files together to become one, and even some additional processing to it.
+That way you can use the combined data as model during template substitution.</p>
+<pre><code class="language-bash">sy merge ./etc/ext/team.yml ./etc/project.yml —at=environment -e | sy substitute template.tpl
 </code></pre>
 <a class="header" href="tools/substitute.html#tips-and-tricks-wip" id="tips-and-tricks-wip"><h3>Tips and Tricks (WIP)</h3></a>
 <ul>
